@@ -1,0 +1,218 @@
+-- SQL statements to create tables for a non-profit donation management system
+-- Create donors table
+CREATE TABLE donors (
+    donor_id SERIAL PRIMARY KEY,
+    donor_type VARCHAR(20) NOT NULL,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    organization_name VARCHAR(100),
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    address_line1 VARCHAR(100),
+    city VARCHAR(50),
+    state VARCHAR(20),
+    postal_code VARCHAR(20),
+    preferred_contact_method VARCHAR(20),
+    donor_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create programs table
+CREATE TABLE programs (
+    program_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    start_date DATE,
+    end_date DATE,
+    budget DECIMAL(10, 2),
+    status VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create donations table
+CREATE TABLE donations (
+    donation_id SERIAL PRIMARY KEY,
+    donor_id INTEGER REFERENCES donors(donor_id),
+    program_id INTEGER REFERENCES programs(program_id),
+    amount DECIMAL(10, 2) NOT NULL,
+    donation_date DATE NOT NULL,
+    payment_method VARCHAR(50),
+    is_recurring BOOLEAN DEFAULT FALSE,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+You can use any of the following AI tools to help generate INSERT statements for your database: -
+Claude - ChatGPT - GitHub Copilot - JetBrains AI Assistant (ctrl+\ in PyCharm)
+
+Ask the AI to generate: - At least 10 donors (mix of individuals and organizations) -
+At least 5 programs - At least 15 donations linked to the donors and programs
+
+### Prompting AI Assistant to Generate Mock data or sample data
+
+Based on the above schema, generate SQL INSERT statements for 10 donors (mix of individuals and organizations), 5 community programs, and 15 donations that link donors to programs for a non-profit grant tracker database. Return only the SQL statments, nothing else.
+use the below DDL when generating mock data: "
+
+* Right-Click to tables Ex. tables 3 => SQL Scripts
+==> Generate DDL to clipboard
+
+2. Go to AI Assistant
+
+3. Paste the DDL in the AI Assistant prompt.
+'''
+Based on the above schema, generate SQL INSERT statements for 10 donors (mix of individuals and organizations), 5 community programs, and 15 donations that link donors to programs for a non-profit grant tracker database. Return only the SQL statments, nothing else.
+use the below DDL when generating mock data:
+[paste the copied DDL here, for example:]
+
+'''
+
+4. On the top of the Generated mock data, select "Insert Snippet at Caret"
+==> that will insert it into the console,
+
+5. Execute the SQL statements to insert the mock data into your database.
+
+6. Now, perform queries on the database to verify the data has been inserted correctly.
+
+
+Query Tasks
+Complete the following tasks by writing SQL queries:
+1.	Basic Queries:
+
+1) Write a query to list all donors and their email addresses
+'''
+SELECT first_name, last_name, organization_name, email
+FROM donors;
+
+'''
+
+2) Write a query to list all programs with budgets over $10,000
+
+SELECT name, budget
+FROM programs
+WHERE budget > 10000
+ORDER BY budget DESC;
+
+
+3) Write a query to show all donations in descending order by amount
+
+-- 3) Write a query to show all donations in descending order by amount
+SELECT *
+FROM donations
+ORDER BY amount DESC;
+
+
+2.	Filtering:
+  1) Find all donors where the email contains "example.com"
+
+--  1) Find all donors where the email contains "example.com"
+
+SELECT *
+FROM donors
+WHERE email LIKE '%example.com%';
+
+
+2) Find all programs that have the word "Youth" in their name or description
+
+-- 2) Find all programs that have the word "Youth" in their name or description
+SELECT *
+FROM programs
+WHERE name LIKE '%Youth%' OR description LIKE '%Youth%'
+
+3) Find all donations made in 2023
+
+-- 3) Find all donations made in 2023
+
+SELECT *
+FROM donations
+WHERE EXTRACT(YEAR FROM donation_date) = 2023
+
+
+
+3.	Advanced Queries:
+
+1) List the total amount donated by each donor (hint: use GROUP BY)
+
+-- 1) List the total amount donated by each donor (hint: use GROUP BY)
+
+SELECT d.first_name, d.last_name, d.organization_name, SUM(don.amount) AS total_donated
+FROM donors d
+JOIN donations don ON d.donor_id = don.donor_id
+GROUP BY d.donor_id, d.first_name, d.last_name, d.organization_name
+ORDER BY total_donated DESC;
+
+2) Find the program that has received the most total donations
+
+-- 2) Find the program that has received the most total donations
+
+SELECT p.program_id, p.name, SUM(don.amount) AS total_donated
+FROM programs p
+JOIN donations don ON p.program_id = don.program_id
+GROUP BY p.program_id, p.name
+ORDER BY total_donated DESC
+LIMIT 1;
+
+
+3) List all donors who have made more than one donation
+
+-- 3) List all donors who have made more than one donation
+
+SELECT d.first_name,
+        d.last_name,
+        d.organization_name, COUNT(don.donation_id) AS donation_count
+FROM donors d
+JOIN donations don ON d.donor_id = don.donor_id
+GROUP BY d.donor_id,
+         d.first_name,
+         d.last_name,
+         d.organization_name
+HAVING COUNT(don.donation_id) > 1
+ORDER BY donation_count DESC;
+
+
+4.	Challenge Query:
+
+1) Create a report showing each program, the total amount donated to that program,
+   and what percentage that represents of all donations
+
+-- Create a report showing each program, the total amount donated to that program, and what percentage that represents of all donations
+
+SELECT p.program_id,
+       p.name,
+       SUM(don.amount) AS total_donated,
+       (SUM(don.amount) / (SELECT SUM(amount) FROM donations) * 100) AS percentage_of_total
+FROM programs p
+JOIN donations don ON p.program_id = don.program_id
+GROUP BY p.program_id, p.name
+ORDER BY total_donated DESC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
